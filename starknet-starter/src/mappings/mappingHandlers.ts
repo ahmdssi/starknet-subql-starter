@@ -42,6 +42,7 @@ type DespositArgs = {
 
 // @ts-ignore
 type DepositLog = StarknetLog<DespositArgs>;
+type WithdrawTransaction = StarknetTransaction;
 
 // Custom method replace "num.toHexString", due to sandbox TextEncoder issue
 //  at utf8ToBytes (webpack://stark-starter/./node_modules/@scure/starknet/node_modules/@noble/hashes/utils.js:109:31)
@@ -82,8 +83,6 @@ export async function handleLog(log: DepositLog): Promise<void> {
   });
   await deposit.save();
 }
-
-type WithdrawTransaction = StarknetTransaction;
 
 export async function handleTransaction(
   tx: WithdrawTransaction
