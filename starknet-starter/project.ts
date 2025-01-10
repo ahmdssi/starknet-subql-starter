@@ -4,13 +4,16 @@ import {
   StarknetHandlerKind,
 } from "@subql/types-starknet";
 
-import * as dotenv from 'dotenv';
-import path from 'path';
+import * as dotenv from "dotenv";
+import path from "path";
 
-const mode = process.env.NODE_ENV || 'production';
+const mode = process.env.NODE_ENV || "production";
 
 // Load the appropriate .env file
-const dotenvPath = path.resolve(__dirname, `.env${mode !== 'production' ? `.${mode}` : ''}`);
+const dotenvPath = path.resolve(
+  __dirname,
+  `.env${mode !== "production" ? `.${mode}` : ""}`
+);
 dotenv.config({ path: dotenvPath });
 
 // Can expand the Datasource processor types via the generic param
@@ -47,18 +50,18 @@ const project: StarknetProject = {
      * If you use a rate limited endpoint, adjust the --batch-size and --workers parameters
      * These settings can be found in your docker-compose.yaml, they will slow indexing but prevent your project being rate limited
      */
-    endpoint: process.env.ENDPOINT!?.split(',') as string[] | string,
+    endpoint: process.env.ENDPOINT!?.split(",") as string[] | string,
   },
   dataSources: [
     {
       kind: StarknetDatasourceKind.Runtime,
       startBlock: 995339,
-
       options: {
         // Must be a key of assets
         abi: "zkLend",
         // # this is the contract address for zkLend market https://starkscan.co/contract/0x04c0a5193d58f74fbace4b74dcf65481e734ed1714121bdc571da345540efa05
-        address: "0x04c0a5193d58f74fbace4b74dcf65481e734ed1714121bdc571da345540efa05",
+        address:
+          "0x04c0a5193d58f74fbace4b74dcf65481e734ed1714121bdc571da345540efa05",
       },
       assets: new Map([["zkLend", { file: "./abis/zkLend.abi.json" }]]),
       mapping: {
@@ -68,7 +71,7 @@ const project: StarknetProject = {
             kind: StarknetHandlerKind.Call,
             handler: "handleTransaction",
             filter: {
-              to:  "0x04c0a5193d58f74fbace4b74dcf65481e734ed1714121bdc571da345540efa05",
+              to: "0x04c0a5193d58f74fbace4b74dcf65481e734ed1714121bdc571da345540efa05",
               type: "INVOKE",
               /**
                * The function can either be the function fragment or signature

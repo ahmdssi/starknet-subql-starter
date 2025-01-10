@@ -1,8 +1,8 @@
-# SubQuery - Example Projects for Starknet
+# SubQuery - Example Project for Starknet
 
 [SubQuery](https://subquery.network) is a fast, flexible, and reliable open-source data indexer that provides you with custom APIs for your web3 project across all of our supported networks. To learn about how to get started with SubQuery, [visit our docs](https://academy.subquery.network).
 
-**This repository contains a list of starter project examples for Starknet.**
+**This SubQuery project indexes all withdrawls and deposits on the zkLend protocol on Starknet Mainnet.**
 
 ## Start
 
