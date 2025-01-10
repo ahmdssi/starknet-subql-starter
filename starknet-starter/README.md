@@ -2,7 +2,7 @@
 
 [SubQuery](https://subquery.network) is a fast, flexible, and reliable open-source data indexer that provides you with custom APIs for your web3 project across all of our supported networks. To learn about how to get started with SubQuery, [visit our docs](https://academy.subquery.network).
 
-**This SubQuery project indexes all withdrawls and deposits on the zkLend protocol on Starknet Mainnet.**
+**This SubQuery project indexes all withdraw call in Invoke transaction and desposit events for the [ZkLend market](https://starkscan.co/contract/0x04c0a5193d58f74fbace4b74dcf65481e734ed1714121bdc571da345540efa05) (`0x04c0a5193d58f74fbace4b74dcf65481e734ed1714121bdc571da345540efa05`) on Starknet Mainnet**
 
 ## Start
 
@@ -40,35 +40,25 @@ For this project, you can try to query with the following GraphQL code to get a 
 
 ```graphql
 {
-  query {
-    deposits(first: 5, orderBy: AMOUNT_DESC) {
-      nodes {
-        id
-        nodeId
-        token
-        addressId
-        amount
-        created
-        createdBlock
-      }
-    }
-    withdraws(
-      first: 5
-      orderBy: CREATED_DESC
-      filter: {
-        token: {
-          likeInsensitive: "0x05574eb6b8789a91466f902c380d978e472db68170ff82a5b650b95a58ddf4ad"
+    query {
+        deposits(first: 5, orderBy: VALUE_DESC) {
+            totalCount
+            nodes {
+                id
+                blockHeight
+                user
+                token
+            }
         }
-      }
-    ) {
-      nodes {
-        id
-        amount
-        created
-        createdBlock
-      }
     }
-  }
+    withdraws(first: 5, orderBy: BLOCK_HEIGHT_DESC) {
+        nodes {
+            id
+            blockHeight
+            user
+            token
+        }
+    }
 }
 ```
 
