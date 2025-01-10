@@ -1,8 +1,8 @@
-# SubQuery - Example Project for Ethereum
+# SubQuery - Example Project for Starknet
 
 [SubQuery](https://subquery.network) is a fast, flexible, and reliable open-source data indexer that provides you with custom APIs for your web3 project across all of our supported networks. To learn about how to get started with SubQuery, [visit our docs](https://academy.subquery.network).
 
-**This SubQuery project indexes all transfers and approval events for the [wrapped Ether token](https://etherscan.io/address/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2) (`0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2`) on Ethereum Mainnet**
+**This SubQuery project indexes all withdraw call in Invoke transaction and desposit events for the [ZkLend market](https://starkscan.co/contract/0x04c0a5193d58f74fbace4b74dcf65481e734ed1714121bdc571da345540efa05) (`0x04c0a5193d58f74fbace4b74dcf65481e734ed1714121bdc571da345540efa05`) on Starknet Mainnet**
 
 ## Start
 
@@ -41,26 +41,22 @@ For this project, you can try to query with the following GraphQL code to get a 
 ```graphql
 {
   query {
-    transfers(first: 5, orderBy: VALUE_DESC) {
+    deposits(first: 5, orderBy: VALUE_DESC) {
       totalCount
       nodes {
         id
         blockHeight
-        from
-        to
-        value
-        contractAddress
+        user
+        token  
       }
     }
   }
-  approvals(first: 5, orderBy: BLOCK_HEIGHT_DESC) {
+  withdraws(first: 5, orderBy: BLOCK_HEIGHT_DESC) {
     nodes {
       id
       blockHeight
-      owner
-      spender
-      value
-      contractAddress
+      user
+      token  
     }
   }
 }
