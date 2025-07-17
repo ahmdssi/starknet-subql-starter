@@ -55,44 +55,21 @@ const project: StarknetProject = {
   dataSources: [
     {
       kind: StarknetDatasourceKind.Runtime,
-      startBlock: 227912,
+      startBlock: 943973,
+      endBlock: 944000,
       options: {
-        // Must be a key of assets
-        abi: "zkLend",
-        // # this is the contract address for zkLend market https://starkscan.co/contract/0x016414cfdf2a94c708420fdd9dbeca9a31f533dc4910b160e75b43c14ad5e232
+        abi: "strk",
         address:
-          "0x016414cfdf2a94c708420fdd9dbeca9a31f533dc4910b160e75b43c14ad5e232",
+          "0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
       },
-      assets: new Map([["zkLend", { file: "./abis/zkLend.abi.json" }]]),
+      assets: new Map([["strk", { file: "./abis/strk.abi.json" }]]),
       mapping: {
         file: "./dist/index.js",
         handlers: [
           {
-            kind: StarknetHandlerKind.Call,
-            handler: "handleTransaction",
-            filter: {
-              to: "0x016414cfdf2a94c708420fdd9dbeca9a31f533dc4910b160e75b43c14ad5e232",
-              type: "INVOKE",
-              /**
-               * The function can either be the function fragment or signature
-               * function: 'withdraw'
-               * function: '0x015511cc3694f64379908437d6d64458dc76d02482052bfb8a5b33a72c054c77'
-               */
-              function: "withdraw",
-            },
-          },
-          {
             kind: StarknetHandlerKind.Event,
-            handler: "handleLog",
-            filter: {
-              /**
-               * Follows standard log filters for Starknet
-               * zkLend address: "0x016414cfdf2a94c708420fdd9dbeca9a31f533dc4910b160e75b43c14ad5e232"
-               */
-              topics: [
-                "Deposit", //0x9149d2123147c5f43d258257fef0b7b969db78269369ebcf5ebb9eef8592f2
-              ],
-            },
+            handler: "strk_handleTransferEvent",
+            filter: { topics: ["Transfer"] },
           },
         ],
       },
