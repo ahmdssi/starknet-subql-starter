@@ -1,116 +1,65 @@
-import assert from "assert";
-import { StarknetLog, StarknetTransaction } from "@subql/types-starknet";
-import { Address, Deposit, Withdraw } from "../types/models";
-import { num } from "starknet";
+import {StarknetLog} from "@subql/types-starknet";
+import {Wallet} from "../types";
+import {Contract} from "starknet";
+import strkAbi from "../../abis/strk.abi.json";
 
-/***
- *
- *     "kind": "struct",
- *     "name": "zklend::market::Market::Deposit",
- *     "type": "event",
- *     "members": [
- *       {
- *         "kind": "data",
- *         "name": "user",
- *         "type": "core::starknet::contract_address::ContractAddress"
- *       },
- *       {
- *         "kind": "data",
- *         "name": "token",
- *         "type": "core::starknet::contract_address::ContractAddress"
- *       },
- *       {
- *         "kind": "data",
- *         "name": "face_amount",
- *         "type": "core::felt252"
- *       }
- *     ]
- *
- */
+export const debug = (subject: string, value: any) =>
+  logger.info(
+    JSON.stringify(
+      { subject, value },
+      (_, value) => (typeof value === "bigint" ? value.toString() : value),
+      2,
+    ),
+  );
 
-type DespositEvent = {
-  user: bigint;
-  token: bigint;
-  face_amount: string;
-};
-type DespositArgs = {
-  "zklend::market::Market::Deposit": DespositEvent;
-  block_hash: string;
-  block_number: number;
-  transaction_hash: string;
-};
+const STRK_ADDRESS =
+  "0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d";
 
-// @ts-ignore
-type DepositLog = StarknetLog<DespositArgs>;
-type WithdrawTransaction = StarknetTransaction;
+export async function getWallet(
+  address: string,
+  updateBalance = false,
+): Promise<Wallet> {
+  let wallet = await Wallet.get(address.toLowerCase());
+  if (wallet && !updateBalance) return wallet;
 
-async function checkGetAddress(addressString: string): Promise<Address> {
-  let address = await Address.get(addressString.toLowerCase());
-  if (!address) {
-    address = Address.create({
-      id: addressString.toLowerCase(),
-    });
-    await address.save();
+  const strkContract = new Contract(strkAbi, STRK_ADDRESS, api);
+  const rawBalance = await strkContract.balance_of(address);
+
+  if (!wallet) {
+    wallet = new Wallet(address.toLowerCase(), rawBalance);
+  } else if (updateBalance) {
+    wallet.balance = rawBalance;
   }
-  return address;
+  await wallet.save();
+  return wallet;
 }
 
-export async function handleLog(log: DepositLog): Promise<void> {
-  logger.info(`New deposit event at block ${log.blockNumber}`);
-  assert(log.args, `No log.args, check tx ${log.transactionHash}`);
-  const event = log.args["zklend::market::Market::Deposit"];
-  const token = num.toHex(event.token);
+const ARGS_KEY = "src::strk::erc20_lockable::ERC20Lockable::Transfer";
+type TransferArgs = {
+  [ARGS_KEY]: {
+    from: bigint;
+    to: bigint;
+    value: bigint;
+  };
+};
 
-  // Get Address
-  const addressString = num.toHex(event.user);
-  const address = await checkGetAddress(addressString);
+export async function strk_handleTransferEvent(log: StarknetLog<TransferArgs>) {
+  const transferArgs = log.args?.[ARGS_KEY];
+  if (!transferArgs) return;
 
-  const deposit = Deposit.create({
-    id: `${log.transactionHash}_${address.id}`,
-    token: token,
-    amount: BigInt(event.face_amount),
-    addressId: address.id,
-    createdBlock: BigInt(log.blockNumber),
-    created: new Date(log.transaction.blockTimestamp * 1000),
-  });
-  await deposit.save();
-}
+  const from = "0x" + transferArgs.from.toString().padStart(63, "0");
+  const to = "0x" + transferArgs.to.toString().padStart(63, "0");
 
-export async function handleTransaction(
-  tx: WithdrawTransaction,
-): Promise<void> {
-  logger.info(`New Withdraw transaction at block ${tx.blockNumber}`);
-  assert(tx.decodedCalls, "No tx decodedCalls");
+  logger.info("strk_handleTransferEvent");
+  debug("strk_handleTransferEvent/log", log);
+  debug("strk_handleTransferEvent/from", from);
+  debug("strk_handleTransferEvent/to", to);
+  logger.info(
+    `New Transfer event from ${from} to ${to} with value ${transferArgs.value}`,
+  );
 
-  // Get Address
-  const addressString = num.toHex(tx.from);
-  const address = await checkGetAddress(addressString);
-
-  for (let i = 0; i < tx.decodedCalls.length; i++) {
-    const call = tx.decodedCalls[i];
-    // Because the entire invoke transaction is returned, so we need to filter out the calls with filter here again
-    // This should not have major impact on performance
-    if (
-      call.selector ===
-        "0x015511cc3694f64379908437d6d64458dc76d02482052bfb8a5b33a72c054c77" ||
-      call.selector ===
-        "0x15511cc3694f64379908437d6d64458dc76d02482052bfb8a5b33a72c054c77"
-    ) {
-      if (!call.decodedArgs) {
-        throw new Error(
-          `Expect decodedArgs in withdraw tx ${tx.hash}, call #${i}`,
-        );
-      }
-
-      const withdraw = Withdraw.create({
-        id: `${tx.hash}_${i}`,
-        addressId: address.id,
-        token: num.toHex(call.decodedArgs.token),
-        amount: BigInt(call.decodedArgs.amount),
-        created: new Date(tx.blockTimestamp * 1000),
-        createdBlock: BigInt(tx.blockNumber),
-      });
-      await withdraw.save();
-    }
-  }
+  await Promise.all([
+    getWallet(from, true),
+    getWallet(to, true),
+  ]);
 }

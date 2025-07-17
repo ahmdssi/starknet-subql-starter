@@ -22,10 +22,12 @@
   "author": "SubQuery Team",
   "license": "MIT",
   "dependencies": {
+    "@subql/types-core": "^2.1.1",
     "@subql/types-starknet": "latest",
     "node-fetch": "2.6.7",
     "starknet": "latest",
-    "text-encoding": "^0.7.0"
+    "text-encoding": "^0.7.0",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@subql/cli": "latest",
