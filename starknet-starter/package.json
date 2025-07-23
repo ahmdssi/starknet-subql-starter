@@ -6,8 +6,8 @@
   "scripts": {
     "build": "subql codegen && subql build",
     "codegen": "subql codegen",
-    "start:docker": "docker-compose pull && docker-compose up --remove-orphans",
-    "dev": "subql codegen && subql build && docker-compose pull && docker-compose up --remove-orphans",
+    "start:docker": "docker compose pull && docker compose up --remove-orphans",
+    "dev": "subql codegen && subql build && docker compose pull && docker compose up --remove-orphans",
     "prepack": "rm -rf dist && npm run build",
     "test": "subql build && subql-node-starknet test",
     "build:develop": "NODE_ENV=develop subql codegen && NODE_ENV=develop subql build"
@@ -23,12 +23,15 @@
   "license": "MIT",
   "dependencies": {
     "@subql/types-starknet": "latest",
-    "ethers": "^5.7.2",
-    "starknet": "latest"
+    "node-fetch": "2.6.7",
+    "starknet": "latest",
+    "text-encoding": "^0.7.0"
   },
   "devDependencies": {
     "@subql/cli": "latest",
     "@subql/testing": "latest",
+    "@types/node-fetch": "^2.6.12",
+    "@types/text-encoding": "^0.0.40",
     "dotenv": "latest",
     "typescript": "latest"
   }

@@ -1,7 +1,7 @@
 import assert from "assert";
 import { StarknetLog, StarknetTransaction } from "@subql/types-starknet";
 import { Address, Deposit, Withdraw } from "../types/models";
-import { BigNumber, BigNumberish } from "ethers";
+import { num } from "starknet";
 
 /***
  *
@@ -29,8 +29,8 @@ import { BigNumber, BigNumberish } from "ethers";
  */
 
 type DespositEvent = {
-  user: BigNumberish;
-  token: BigNumberish;
+  user: bigint;
+  token: bigint;
   face_amount: string;
 };
 type DespositArgs = {
@@ -43,14 +43,6 @@ type DespositArgs = {
 // @ts-ignore
 type DepositLog = StarknetLog<DespositArgs>;
 type WithdrawTransaction = StarknetTransaction;
-
-// Custom method replace "num.toHexString", due to sandbox TextEncoder issue
-//  at utf8ToBytes (webpack://stark-starter/./node_modules/@scure/starknet/node_modules/@noble/hashes/utils.js:109:31)
-function convertBigNumberish(bigNumberish: BigNumberish): string {
-  const bigNumber = BigNumber.from(bigNumberish);
-  const hexValue = bigNumber.toHexString();
-  return hexValue;
-}
 
 async function checkGetAddress(addressString: string): Promise<Address> {
   let address = await Address.get(addressString.toLowerCase());
@@ -67,10 +59,10 @@ export async function handleLog(log: DepositLog): Promise<void> {
   logger.info(`New deposit event at block ${log.blockNumber}`);
   assert(log.args, `No log.args, check tx ${log.transactionHash}`);
   const event = log.args["zklend::market::Market::Deposit"];
-  const token = convertBigNumberish(event.token);
+  const token = num.toHex(event.token);
 
   // Get Address
-  const addressString = convertBigNumberish(event.user);
+  const addressString = num.toHex(event.user);
   const address = await checkGetAddress(addressString);
 
   const deposit = Deposit.create({
@@ -91,7 +83,7 @@ export async function handleTransaction(
   assert(tx.decodedCalls, "No tx decodedCalls");
 
   // Get Address
-  const addressString = convertBigNumberish(tx.from);
+  const addressString = num.toHex(tx.from);
   const address = await checkGetAddress(addressString);
 
   for (let i = 0; i < tx.decodedCalls.length; i++) {
@@ -113,7 +105,7 @@ export async function handleTransaction(
       const withdraw = Withdraw.create({
         id: `${tx.hash}_${i}`,
         addressId: address.id,
-        token: convertBigNumberish(call.decodedArgs.token),
+        token: num.toHex(call.decodedArgs.token),
         amount: BigInt(call.decodedArgs.amount),
         created: new Date(tx.blockTimestamp * 1000),
         createdBlock: BigInt(tx.blockNumber),

@@ -23,14 +23,16 @@
   "license": "MIT",
   "dependencies": {
     "@subql/types-starknet": "latest",
-    "ethers": "^5.7.2",
-    "starknet": "latest"
+    "node-fetch": "2.6.7",
+    "starknet": "latest",
+    "text-encoding": "^0.7.0"
   },
   "devDependencies": {
     "@subql/cli": "latest",
     "@subql/testing": "latest",
+    "@types/node-fetch": "^2.6.12",
+    "@types/text-encoding": "^0.0.40",
     "dotenv": "latest",
     "typescript": "latest"
-  },
-  "packageManager": "yarn@3.8.1+sha512.8cfec856814c797ccb480703ca5270824327fac5abce240835e2699e01732229fd22bbeb1bb87047a0069f7698be9b2e3d9a926e6046e851faa9908fdacdeacf"
+  }
 }
